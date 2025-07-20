@@ -41,7 +41,13 @@ class Dispositivo(Base):
     vendor = Column(String, nullable=True)
     detectado = Column(DateTime, default=datetime.utcnow)
 
-    puertos = relationship("Puerto", backref="dispositivo", cascade="all, delete")
+    # Delete orphaned port rows when they are removed from the relationship to
+    # avoid NULL ``dispositivo_id`` errors when updating devices.
+    puertos = relationship(
+        "Puerto",
+        backref="dispositivo",
+        cascade="all, delete, delete-orphan",
+    )
 
 
 def crear_base_datos() -> None:
