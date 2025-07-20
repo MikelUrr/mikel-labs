@@ -2,7 +2,7 @@
 
 from datetime import datetime
 import os
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Float
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker, Session
 
 # Create a persistent data directory inside ``backend`` to store the DB file
@@ -49,6 +49,17 @@ class Dispositivo(Base):
         cascade="all, delete, delete-orphan",
     )
 
+class MetricaHistorica(Base):
+    __tablename__ = "metricas_historicas"
+
+    id = Column(Integer, primary_key=True, index=True)
+    dispositivo_id = Column(Integer, ForeignKey("dispositivos.id"), nullable=False)
+    fecha = Column(DateTime, default=datetime.utcnow)
+    latencia_ms = Column(Float, nullable=True)
+    estado = Column(String, nullable=True)  # up/down
+    paquetes_perdidos = Column(Float, nullable=True)
+
+    dispositivo = relationship("Dispositivo", backref="historico_metricas")
 
 def crear_base_datos() -> None:
     """Crea las tablas en la base de datos si no existen."""
@@ -121,7 +132,15 @@ def insertar_o_actualizar_dispositivo(data: dict) -> None:
     finally:
         session.close()
 
-
+def guardar_metrica(session: Session, dispositivo_id: int, latencia_ms: float, paquetes_perdidos: float) -> None:
+    metrica = MetricaHistorica(
+        dispositivo_id=dispositivo_id,
+        latencia_ms=latencia_ms,
+        paquetes_perdidos=paquetes_perdidos,
+        estado="up"
+    )
+    session.add(metrica)
+    session.commit()
 
 __all__ = [
     "Base",

@@ -9,6 +9,8 @@ from typing import List
 
 from app.database import Dispositivo, SessionLocal
 from app.schemas import DispositivoModel
+from app.schemas import MetricaHistoricaSchema
+from app.database import MetricaHistorica
 
 router = APIRouter()
 
@@ -49,3 +51,12 @@ def get_puerto_por_ip(ip: str, db: Session = Depends(get_db)) -> DispositivoMode
         raise HTTPException(status_code=404, detail="Dispositivo no encontrado")
 
     return dispositivo
+
+@router.get("/historico/{ip}", response_model=List[MetricaHistoricaSchema])
+def get_historico_por_ip(ip: str, db: Session = Depends(get_db)):
+    dispositivo = db.query(Dispositivo).filter_by(ip=ip).first()
+    if not dispositivo:
+        raise HTTPException(status_code=404, detail="Dispositivo no encontrado")
+
+    return db.query(MetricaHistorica).filter_by(dispositivo_id=dispositivo.id).order_by(MetricaHistorica.fecha.desc()).all()
+

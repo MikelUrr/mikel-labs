@@ -38,7 +38,7 @@ def setup_api() -> FastAPI:
 
 app = setup_api()
 crear_base_datos()
-
+#escaneo_completo()
 # Scheduler setup
 scheduler = BackgroundScheduler()
 scheduler.add_job(

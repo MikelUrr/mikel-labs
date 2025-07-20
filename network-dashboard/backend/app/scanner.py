@@ -8,10 +8,11 @@ Julio 2025
 
 from datetime import datetime
 from typing import Dict, List
-
+import subprocess
 import nmap
-
+from app.database import SessionLocal
 from app.database import insertar_o_actualizar_dispositivo
+from app.database import guardar_metrica
 
 
 def escanear_red_nmap(method_args: str, target_range: str = "192.168.1.0/24") -> List[Dict]:
@@ -68,9 +69,20 @@ def escanear_red_nmap(method_args: str, target_range: str = "192.168.1.0/24") ->
 
     return resultados
 
-
+def obtener_latencia(ip: str) -> dict:
+    try:
+        salida = subprocess.check_output(["ping", "-c", "4", ip], universal_newlines=True)
+        lines = salida.split("\n")
+        resumen = [line for line in lines if "rtt" in line or "packet loss" in line]
+        latencia = float(resumen[0].split("=")[1].split("/")[1])  # promedio
+        perdida = float(resumen[1].split("%")[0].split()[-1])     # porcentaje
+        return {"latencia_ms": latencia, "paquetes_perdidos": perdida}
+    except Exception:
+        return {"latencia_ms": None, "paquetes_perdidos": None}  
+    
 def escaneo_completo() -> None:
     """Performs a full network scan using multiple Nmap techniques and updates the database."""
+    session = SessionLocal()
     metodos = [
         "-sn",
         "-sS -Pn",
@@ -91,5 +103,7 @@ def escaneo_completo() -> None:
 
     for dispositivo in resultados_finales:
         insertar_o_actualizar_dispositivo(dispositivo)
-
+        latencia = obtener_latencia(dispositivo["ip"])
+        guardar_metrica(session, dispositivo_id=db_obj.id, **latencia)
     print(f"Escaneo completo. {len(resultados_finales)} dispositivos activos detectados.")
+    session.close()

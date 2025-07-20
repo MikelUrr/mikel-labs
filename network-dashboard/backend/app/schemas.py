@@ -37,7 +37,19 @@ class DispositivoModel(BaseModel):
 
         orm_mode = True
 
+
+class MetricaHistoricaSchema(BaseModel):
+    fecha: datetime
+    latencia_ms: Optional[float]
+    paquetes_perdidos: Optional[float]
+    estado: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+
 __all__ = [
     "PuertoModel",
     "DispositivoModel",
+    "MetricaHistoricaSchema",
 ]
