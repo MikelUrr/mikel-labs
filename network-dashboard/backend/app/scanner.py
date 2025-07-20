@@ -11,7 +11,7 @@ from typing import Dict, List
 import subprocess
 import nmap
 from app.database import SessionLocal
-from app.database import insertar_o_actualizar_dispositivo
+from app.database import actualizar_dispositivo
 from app.database import guardar_metrica
 
 
@@ -102,7 +102,7 @@ def escaneo_completo() -> None:
     resultados_finales = list(vistos.values())
 
     for dispositivo in resultados_finales:
-        insertar_o_actualizar_dispositivo(dispositivo)
+        db_obj = actualizar_dispositivo(session, dispositivo)
         latencia = obtener_latencia(dispositivo["ip"])
         guardar_metrica(session, dispositivo_id=db_obj.id, **latencia)
     print(f"Escaneo completo. {len(resultados_finales)} dispositivos activos detectados.")

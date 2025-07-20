@@ -66,7 +66,7 @@ def crear_base_datos() -> None:
     Base.metadata.create_all(bind=engine)
 
 
-def insertar_dispositivo(session: Session, data: dict) -> None:
+def insertar_dispositivo(session: Session, data: dict) -> Dispositivo:
     """Inserta un nuevo dispositivo y sus puertos en la base de datos.
 
     Args:
@@ -92,9 +92,11 @@ def insertar_dispositivo(session: Session, data: dict) -> None:
 
     session.add(dispositivo)
     session.commit()
+    session.refresh(dispositivo)
+    return dispositivo
 
 
-def actualizar_dispositivo(session: Session, data: dict) -> None:
+def actualizar_dispositivo(session: Session, data: dict) -> Dispositivo:
     """Actualiza un dispositivo existente, sobrescribiendo sus datos y puertos.
 
     Args:
@@ -103,8 +105,8 @@ def actualizar_dispositivo(session: Session, data: dict) -> None:
     """
     dispositivo = session.query(Dispositivo).filter_by(ip=data["ip"]).first()
     if not dispositivo:
-        insertar_dispositivo(session, data)
-        return
+        dispositivo = insertar_dispositivo(session, data)
+        return dispositivo
 
     dispositivo.estado = data["estado"]
     dispositivo.hostname = data.get("hostname")
@@ -122,6 +124,8 @@ def actualizar_dispositivo(session: Session, data: dict) -> None:
         ))
 
     session.commit()
+    session.refresh(dispositivo)
+    return dispositivo
 
 
 def insertar_o_actualizar_dispositivo(data: dict) -> None:
@@ -151,4 +155,5 @@ __all__ = [
     "insertar_dispositivo",
     "actualizar_dispositivo",
     "insertar_o_actualizar_dispositivo",
+    "guardar_metrica",
 ]
