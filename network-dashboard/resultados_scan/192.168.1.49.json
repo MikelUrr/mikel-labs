@@ -1,0 +1,16 @@
+{
+  "ip": "192.168.1.49",
+  "estado": "up",
+  "hostname": "",
+  "mac": "24:CE:33:EB:3D:5D",
+  "vendor": "Amazon Technologies",
+  "puertos": [
+    {
+      "puerto": 9091,
+      "estado": "open",
+      "servicio": "xmltec-xmlmail",
+      "producto": ""
+    }
+  ],
+  "detectado": "2025-07-19T12:51:42.463397"
+}

@@ -1,0 +1,108 @@
+[
+  {
+    "ip": "192.168.1.1",
+    "estado": "up",
+    "hostname": "liveboxfibra",
+    "mac": null,
+    "vendor": null,
+    "puertos": [],
+    "detectado": "2025-07-19T12:51:42.893002"
+  },
+  {
+    "ip": "192.168.1.34",
+    "estado": "up",
+    "hostname": "Chromecast.home",
+    "mac": null,
+    "vendor": null,
+    "puertos": [],
+    "detectado": "2025-07-19T12:51:42.894603"
+  },
+  {
+    "ip": "192.168.1.38",
+    "estado": "up",
+    "hostname": "M2012K11AG.home",
+    "mac": null,
+    "vendor": null,
+    "puertos": [],
+    "detectado": "2025-07-19T12:51:42.894638"
+  },
+  {
+    "ip": "192.168.1.45",
+    "estado": "up",
+    "hostname": "HUAWEI_MediaPad_T5-fb35b1.home",
+    "mac": null,
+    "vendor": null,
+    "puertos": [],
+    "detectado": "2025-07-19T12:51:42.894705"
+  },
+  {
+    "ip": "192.168.1.49",
+    "estado": "up",
+    "hostname": "",
+    "mac": "24:CE:33:EB:3D:5D",
+    "vendor": "Amazon Technologies",
+    "puertos": [
+      {
+        "puerto": 9091,
+        "estado": "open",
+        "servicio": "xmltec-xmlmail",
+        "producto": ""
+      }
+    ],
+    "detectado": "2025-07-19T12:51:42.463397"
+  },
+  {
+    "ip": "192.168.1.70",
+    "estado": "up",
+    "hostname": "mikel-Lenovo-ideapad-S530-13IWL.home",
+    "mac": null,
+    "vendor": null,
+    "puertos": [],
+    "detectado": "2025-07-19T12:51:42.894941"
+  },
+  {
+    "ip": "192.168.1.98",
+    "estado": "up",
+    "hostname": "LGwebOSTV.home",
+    "mac": null,
+    "vendor": null,
+    "puertos": [],
+    "detectado": "2025-07-19T12:51:42.895243"
+  },
+  {
+    "ip": "192.168.1.109",
+    "estado": "up",
+    "hostname": "Redmi-Note-8-Pro.home",
+    "mac": null,
+    "vendor": null,
+    "puertos": [],
+    "detectado": "2025-07-19T12:51:42.893106"
+  },
+  {
+    "ip": "192.168.1.108",
+    "estado": "up",
+    "hostname": "A36-de-Laura.home",
+    "mac": null,
+    "vendor": null,
+    "puertos": [],
+    "detectado": "2025-07-19T12:51:42.893096"
+  },
+  {
+    "ip": "192.168.1.150",
+    "estado": "up",
+    "hostname": "garmin-vvoactive6-1211d6f3181f.home",
+    "mac": null,
+    "vendor": null,
+    "puertos": [],
+    "detectado": "2025-07-19T12:51:42.893515"
+  },
+  {
+    "ip": "192.168.1.75",
+    "estado": "up",
+    "hostname": "bosch-dishwasher-403110520721013059.home",
+    "mac": null,
+    "vendor": null,
+    "puertos": [],
+    "detectado": "2025-07-19T12:51:42.894992"
+  }
+]

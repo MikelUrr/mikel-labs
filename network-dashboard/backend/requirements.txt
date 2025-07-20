@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]==0.29.0
+python-nmap
+SQLAlchemy
+APScheduler
+pydantic
