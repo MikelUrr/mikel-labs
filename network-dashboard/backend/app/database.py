@@ -1,10 +1,16 @@
 """Database connection and models for the network dashboard."""
 
 from datetime import datetime
+import os
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker, Session
 
-DATABASE_URL = "sqlite:///network_dashboard.db"
+# Create a persistent data directory inside ``backend`` to store the DB file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(os.path.dirname(BASE_DIR), "data")
+os.makedirs(DATA_DIR, exist_ok=True)
+
+DATABASE_URL = f"sqlite:///{os.path.join(DATA_DIR, 'network_dashboard.db')}"
 
 Base = declarative_base()
 engine = create_engine(DATABASE_URL, echo=False)
