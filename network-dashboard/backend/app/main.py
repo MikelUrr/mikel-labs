@@ -16,6 +16,7 @@ from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
 from app.api import router as api_router
 from app.scanner import escaneo_completo
+from app.database import crear_base_datos
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -36,6 +37,7 @@ def setup_api() -> FastAPI:
 
 
 app = setup_api()
+crear_base_datos()
 
 # Scheduler setup
 scheduler = BackgroundScheduler()
