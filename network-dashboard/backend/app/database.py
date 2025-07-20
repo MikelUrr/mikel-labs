@@ -1,7 +1,5 @@
-"""
-setup database connection andd models for networwork dashboard.
-"""
-from typing import List, Optional
+"""Database connection and models for the network dashboard."""
+
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker, Session
