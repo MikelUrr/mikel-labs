@@ -10,7 +10,7 @@ import os
 import nmap
 from datetime import datetime
 from typing import List, Dict
-from database import insertar_o_actualizar_dispositivo
+from app.database import insertar_o_actualizar_dispositivo
 
 
 def escanear_red_nmap(method_args: str, target_range: str = "192.168.1.0/24") -> List[Dict]:
