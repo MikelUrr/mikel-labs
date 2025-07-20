@@ -103,6 +103,15 @@ def actualizar_dispositivo(session: Session, data: dict) -> None:
     session.commit()
 
 
+def insertar_o_actualizar_dispositivo(data: dict) -> None:
+    """Inserta o actualiza un dispositivo utilizando una sesión temporal."""
+    session = SessionLocal()
+    try:
+        actualizar_dispositivo(session, data)
+    finally:
+        session.close()
+
+
 
 __all__ = [
     "Base",
@@ -112,4 +121,5 @@ __all__ = [
     "crear_base_datos",
     "insertar_dispositivo",
     "actualizar_dispositivo",
+    "insertar_o_actualizar_dispositivo",
 ]

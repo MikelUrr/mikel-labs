@@ -47,7 +47,7 @@ def start() -> None:
     """Starts the FastAPI server with default or environment settings."""
     port = int(os.getenv("PORT", "8000"))
     host: str = os.getenv("HOST", "0.0.0.0")
-    uvicorn.run("main:app", host=host, port=port, reload=True)
+    uvicorn.run("app.main:app", host=host, port=port, reload=True)
 
 
 if __name__ == "__main__":
