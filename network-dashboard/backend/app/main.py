@@ -30,16 +30,20 @@ def setup_api() -> FastAPI:
     Returns:
         FastAPI: The configured FastAPI application instance.
     """
-    app = FastAPI(title=APP_NAME)
-    app.include_router(api_router, prefix=API_PREFIX)
-    return app
+    application = FastAPI(title=APP_NAME)
+    application.include_router(api_router, prefix=API_PREFIX)
+    return application
 
 
 app = setup_api()
 
 # Scheduler setup
 scheduler = BackgroundScheduler()
-scheduler.add_job(escaneo_completo, "interval", seconds=int(os.getenv("SCAN_INTERVAL", 300)))
+scheduler.add_job(
+    escaneo_completo,
+    "interval",
+    seconds=int(os.getenv("SCAN_INTERVAL", "300")),
+)
 scheduler.start()
 
 

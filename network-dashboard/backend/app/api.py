@@ -3,10 +3,12 @@
 Provides routes to retrieve port scanning information from the database.
 """
 
-from fastapi import APIRouter, HTTPException, Depends
-from typing import List, Dict
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import SessionLocal, Dispositivo
+from typing import List
+
+from app.database import Dispositivo, SessionLocal
+from app.schemas import DispositivoModel
 
 router = APIRouter()
 
@@ -18,59 +20,32 @@ def get_db():
     finally:
         db.close()
 
-@router.get("/puertos", response_model=List[Dict])
-def get_puertos(db: Session = Depends(get_db)) -> List[Dict]:
-    """Returns a list of all devices with their open ports.
+@router.get("/puertos", response_model=List[DispositivoModel])
+def get_puertos(db: Session = Depends(get_db)) -> List[DispositivoModel]:
+    """Retrieve all devices with their open ports.
 
     Args:
-        db (Session): SQLAlchemy database session.
+        db: SQLAlchemy database session dependency.
 
     Returns:
-        List[Dict]: List of devices and their port information.
+        A list of devices retrieved from the database.
     """
     dispositivos = db.query(Dispositivo).all()
-    resultado = []
-    for d in dispositivos:
-        resultado.append({
-            "ip": d.ip,
-            "hostname": d.hostname,
-            "mac": d.mac,
-            "vendor": d.vendor,
-            "puertos": [{
-                "puerto": p.puerto,
-                "estado": p.estado,
-                "servicio": p.servicio,
-                "producto": p.producto
-            } for p in d.puertos],
-            "detectado": d.detectado.isoformat()
-        })
-    return resultado
+    return dispositivos
 
-@router.get("/puerto/{ip}", response_model=Dict)
-def get_puerto_por_ip(ip: str, db: Session = Depends(get_db)) -> Dict:
-    """Returns device and port info for a specific IP.
+@router.get("/puerto/{ip}", response_model=DispositivoModel)
+def get_puerto_por_ip(ip: str, db: Session = Depends(get_db)) -> DispositivoModel:
+    """Retrieve device information for a specific IP.
 
     Args:
-        ip (str): IP address of the device.
-        db (Session): SQLAlchemy session.
+        ip: IP address of the device.
+        db: SQLAlchemy database session dependency.
 
     Returns:
-        Dict: Device data and open ports.
+        The requested device or raises ``HTTPException`` if not found.
     """
     dispositivo = db.query(Dispositivo).filter_by(ip=ip).first()
     if not dispositivo:
         raise HTTPException(status_code=404, detail="Dispositivo no encontrado")
 
-    return {
-        "ip": dispositivo.ip,
-        "hostname": dispositivo.hostname,
-        "mac": dispositivo.mac,
-        "vendor": dispositivo.vendor,
-        "puertos": [{
-            "puerto": p.puerto,
-            "estado": p.estado,
-            "servicio": p.servicio,
-            "producto": p.producto
-        } for p in dispositivo.puertos],
-        "detectado": dispositivo.detectado.isoformat()
-    }
+    return dispositivo

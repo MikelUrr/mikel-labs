@@ -6,10 +6,11 @@ Author: Mikel Urrestarazu
 Julio 2025
 """
 
-import os
-import nmap
 from datetime import datetime
-from typing import List, Dict
+from typing import Dict, List
+
+import nmap
+
 from app.database import insertar_o_actualizar_dispositivo
 
 
@@ -28,8 +29,8 @@ def escanear_red_nmap(method_args: str, target_range: str = "192.168.1.0/24") ->
 
     try:
         nm.scan(hosts=target_range, arguments=method_args)
-    except Exception as e:
-        print(f"Error en escaneo con {method_args}: {e}")
+    except nmap.PortScannerError as exc:
+        print(f"Error en escaneo con {method_args}: {exc}")
         return []
 
     resultados = []
@@ -44,13 +45,13 @@ def escanear_red_nmap(method_args: str, target_range: str = "192.168.1.0/24") ->
             "detectado": datetime.now().isoformat()
         }
 
-        if 'addresses' in nm[host] and 'mac' in nm[host]['addresses']:
-            host_info["mac"] = nm[host]['addresses']['mac']
-        if 'vendor' in nm[host] and nm[host]['vendor']:
-            host_info["vendor"] = list(nm[host]['vendor'].values())[0]
+        if "addresses" in nm[host] and "mac" in nm[host]["addresses"]:
+            host_info["mac"] = nm[host]["addresses"]["mac"]
+        if "vendor" in nm[host] and nm[host]["vendor"]:
+            host_info["vendor"] = list(nm[host]["vendor"].values())[0]
 
-        if 'tcp' in nm[host]:
-            for port, portdata in nm[host]['tcp'].items():
+        if "tcp" in nm[host]:
+            for port, portdata in nm[host]["tcp"].items():
                 host_info["puertos"].append({
                     "puerto": port,
                     "estado": portdata["state"],
