@@ -1,62 +1,153 @@
-"""API endpoints for the network dashboard.
+"""API endpoints for the Network Dashboard application.
 
-Provides routes to retrieve port scanning information from the database.
+This module provides RESTful endpoints to:
+- Retrieve network devices and their open ports
+- Access historical metrics
+- Search/filter devices by various criteria
+
+Routes are organized by resource type:
+- /devices: Device-related operations
+- /metrics: Historical data access
+
+All endpoints:
+- Return validated data using Pydantic models
+- Include proper error handling (404, 422, etc.)
+- Are documented in the OpenAPI schema
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import datetime 
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
-from app.database import Dispositivo, SessionLocal
-from app.schemas import DispositivoModel
-from app.schemas import MetricaHistoricaSchema
-from app.database import MetricaHistorica
+from app.database import Dispositivo, MetricaHistorica, get_db
+from app.schemas import DispositivoSchema, MetricaSchema
+from app.validators import validate_ip
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/v1",
+    tags=["devices"],
+)
 
-def get_db():
-    """Dependency to get database session."""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-@router.get("/puertos", response_model=List[DispositivoModel])
-def get_puertos(db: Session = Depends(get_db)) -> List[DispositivoModel]:
-    """Retrieve all devices with their open ports.
-
+@router.get(
+    "/devices",
+    response_model=List[DispositivoSchema],
+    summary="List all devices",
+    description="Retrieves all network devices with their open ports",
+)
+async def list_devices(
+    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0, description="Pagination offset"),
+    limit: int = Query(100, le=1000, description="Max items to return"),
+) -> List[DispositivoSchema]:
+    """Retrieves a paginated list of network devices.
+    
     Args:
-        db: SQLAlchemy database session dependency.
-
+        db: Database session dependency.
+        skip: Number of items to skip (for pagination).
+        limit: Maximum number of items to return.
+    
     Returns:
-        A list of devices retrieved from the database.
+        List of devices with their associated ports.
     """
-    dispositivos = db.query(Dispositivo).all()
-    return dispositivos
+    return db.query(Dispositivo).offset(skip).limit(limit).all()
 
-@router.get("/puerto/{ip}", response_model=DispositivoModel)
-def get_puerto_por_ip(ip: str, db: Session = Depends(get_db)) -> DispositivoModel:
-    """Retrieve device information for a specific IP.
 
+@router.get(
+    "/devices/{ip}",
+    response_model=DispositivoSchema,
+    responses={
+        404: {"description": "Device not found"},
+        422: {"description": "Invalid IP address format"},
+    },
+)
+async def get_device(
+    ip: str = Depends(validate_ip),
+    db: Session = Depends(get_db),
+) -> DispositivoSchema:
+    """Retrieves a single device by its IP address.
+    
     Args:
-        ip: IP address of the device.
-        db: SQLAlchemy database session dependency.
-
+        ip: Validated IP address.
+        db: Database session dependency.
+    
+    Raises:
+        HTTPException: 404 if device not found.
+    
     Returns:
-        The requested device or raises ``HTTPException`` if not found.
+        The requested device with its ports.
     """
-    dispositivo = db.query(Dispositivo).filter_by(ip=ip).first()
-    if not dispositivo:
-        raise HTTPException(status_code=404, detail="Dispositivo no encontrado")
+    device = db.query(Dispositivo).filter_by(ip=ip).first()
+    if not device:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Device with IP {ip} not found"
+        )
+    return device
 
-    return dispositivo
 
-@router.get("/historico/{ip}", response_model=List[MetricaHistoricaSchema])
-def get_historico_por_ip(ip: str, db: Session = Depends(get_db)):
-    dispositivo = db.query(Dispositivo).filter_by(ip=ip).first()
-    if not dispositivo:
-        raise HTTPException(status_code=404, detail="Dispositivo no encontrado")
+@router.get(
+    "/devices/{ip}/metrics",
+    response_model=List[MetricaSchema],
+    summary="Get device metrics",
+    responses={
+        404: {"description": "Device not found"},
+        422: {"description": "Invalid IP address format"},
+    },
+)
+async def get_device_metrics(
+    ip: str = Depends(validate_ip),
+    db: Session = Depends(get_db),
+    time_from: Optional[datetime] = Query(
+        None,
+        description="Filter metrics after this timestamp",
+    ),
+    time_to: Optional[datetime] = Query(
+        None,
+        description="Filter metrics before this timestamp",
+    ),
+) -> List[MetricaSchema]:
+    """Retrieves historical metrics for a specific device.
+    
+    Args:
+        ip: Validated IP address.
+        db: Database session dependency.
+        time_from: Optional start time filter.
+        time_to: Optional end time filter.
+    
+    Returns:
+        Chronologically ordered list of metrics.
+    """
+    device = db.query(Dispositivo).filter_by(ip=ip).first()
+    if not device:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Device with IP {ip} not found"
+        )
 
-    return db.query(MetricaHistorica).filter_by(dispositivo_id=dispositivo.id).order_by(MetricaHistorica.fecha.desc()).all()
+    query = db.query(MetricaHistorica).filter_by(dispositivo_id=device.id)
+    
+    if time_from:
+        query = query.filter(MetricaHistorica.fecha >= time_from)
+    if time_to:
+        query = query.filter(MetricaHistorica.fecha <= time_to)
+    
+    return query.order_by(MetricaHistorica.fecha.desc()).all()
 
+
+# Additional helper file: validators.py
+"""
+from fastapi import Depends, HTTPException
+import re
+
+IP_REGEX = r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
+
+def validate_ip(ip: str) -> str:
+    if not re.match(IP_REGEX, ip):
+        raise HTTPException(
+            status_code=422,
+            detail="Invalid IP address format"
+        )
+    return ip
+"""

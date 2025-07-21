@@ -70,15 +70,36 @@ def escanear_red_nmap(method_args: str, target_range: str = "192.168.1.0/24") ->
     return resultados
 
 def obtener_latencia(ip: str) -> dict:
+    """Calcula latencia y pérdida de paquetes para una IP mediante ping.
+
+    Args:
+        ip (str): IP a evaluar.
+
+    Returns:
+        dict: Diccionario con latencia promedio y porcentaje de pérdida.
+    """
     try:
         salida = subprocess.check_output(["ping", "-c", "4", ip], universal_newlines=True)
-        lines = salida.split("\n")
-        resumen = [line for line in lines if "rtt" in line or "packet loss" in line]
-        latencia = float(resumen[0].split("=")[1].split("/")[1])  # promedio
-        perdida = float(resumen[1].split("%")[0].split()[-1])     # porcentaje
-        return {"latencia_ms": latencia, "paquetes_perdidos": perdida}
-    except Exception:
-        return {"latencia_ms": None, "paquetes_perdidos": None}  
+        print(salida)
+        latencia = None
+        perdida = None
+
+        for line in salida.split("\n"):
+            if "packet loss" in line:
+                # Ej: 4 packets transmitted, 4 received, 0% packet loss, time 3003ms
+                perdida = float(line.split("%")[0].split()[-1])
+            elif "rtt min/avg/max/mdev" in line:
+                # Ej: rtt min/avg/max/mdev = 251.324/342.136/432.077/80.470 ms
+                latencia = float(line.split("=")[1].split("/")[1])
+
+        return {
+            "latencia_ms": latencia,
+            "paquetes_perdidos": perdida
+        }
+
+    except Exception as e:
+        print(f"Error obteniendo latencia para {ip}: {e}")
+        return {"latencia_ms": None, "paquetes_perdidos": None}
     
 def escaneo_completo() -> None:
     """Performs a full network scan using multiple Nmap techniques and updates the database."""
