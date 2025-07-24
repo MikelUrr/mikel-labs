@@ -20,7 +20,7 @@ Attributes:
 """
 
 import os
-from contextlib import contextmanager
+
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Iterator
 
@@ -44,7 +44,7 @@ engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 
-@contextmanager
+
 def get_db() -> Iterator[Session]:
     """Yields a database session with automatic cleanup.
     
